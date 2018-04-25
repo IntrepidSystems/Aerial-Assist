@@ -3,7 +3,11 @@
 --- !u!78 &1
 TagManager:
   serializedVersion: 2
-  tags: []
+  tags:
+  - Red High Goal Sensor
+  - Blue High Goal Sensor
+  - Red Low Goal Sensor
+  - Blue Low Goal Sensor
   layers:
   - Default
   - TransparentFX
