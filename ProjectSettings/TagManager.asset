@@ -8,6 +8,9 @@ TagManager:
   - Blue High Goal Sensor
   - Red Low Goal Sensor
   - Blue Low Goal Sensor
+  - Truss Sensor
+  - Intake Wheel
+  - Intake Back
   layers:
   - Default
   - TransparentFX
@@ -18,7 +21,7 @@ TagManager:
   - 
   - 
   - Static Field
-  - 
+  - 971 Robot
   - 
   - 
   - 
