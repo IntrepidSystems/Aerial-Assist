@@ -11,6 +11,9 @@ TagManager:
   - Truss Sensor
   - Intake Wheel
   - Intake Back
+  - Field Box
+  - Behind Blue Goal Box
+  - Behind Red Goal Box
   layers:
   - Default
   - TransparentFX

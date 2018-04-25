@@ -287,8 +287,8 @@
     <Compile Include="Assets\Scripts\971\ClawControl.cs" />
     <Compile Include="Assets\Scripts\971\Control.cs" />
     <Compile Include="Assets\Scripts\CameraFollower.cs" />
-    <Compile Include="Assets\Scripts\DespawnBall.cs" />
     <Compile Include="Assets\Scripts\FollowObject.cs" />
+    <Compile Include="Assets\Scripts\IntakeBall.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Target Name="GenerateTargetFrameworkMonikerAttribute" />

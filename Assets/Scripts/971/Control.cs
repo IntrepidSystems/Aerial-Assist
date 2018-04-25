@@ -7,6 +7,7 @@ public class Control : MonoBehaviour {
     private Rigidbody body;
     public GameObject prefab, heldBall, clawBack, claw;
     public float shotPower, shotOffset, driveSpeed, turnSpeed;
+    public GameObject humanPlayerStation1, humanPlayerStation2, humanPlayerStation1Prep, humanPlayerStation2Prep;
 
     private enum ClawState { VERTICAL, FORWARD_LONG_SHOT, FORWARD_SHORT_SHOT, BACKWARD_LONG_SHOT, BACKWARD_SHORT_SHOT, INTAKE }
     public float INTAKE, VERTICAL, FORWARD_LONG_SHOT, BACKWARD_LONG_SHOT;
@@ -28,6 +29,12 @@ public class Control : MonoBehaviour {
 
         if(!wasSpacedLast && Input.GetKey("space") && heldBall.active) {
             GameObject ball = Instantiate(prefab);
+            IntakeBall intakeScript = ball.GetComponent<IntakeBall>();
+            intakeScript.humanPlayerStation1 = humanPlayerStation1;
+            intakeScript.humanPlayerStation2 = humanPlayerStation2;
+            intakeScript.humanPlayerStation1Prep = humanPlayerStation1Prep;
+            intakeScript.humanPlayerStation2Prep = humanPlayerStation2Prep;
+
             ball.transform.position = heldBall.transform.position + (shotOffset * (heldBall.transform.position - clawBack.transform.position));
             ball.GetComponent<Rigidbody>().AddForce(shotPower * (heldBall.transform.position - clawBack.transform.position) + body.velocity, ForceMode.VelocityChange);
             heldBall.active = false;
