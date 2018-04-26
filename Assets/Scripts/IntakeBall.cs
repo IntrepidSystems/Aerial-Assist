@@ -1,17 +1,22 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class IntakeBall : MonoBehaviour {
 
     public GameObject humanPlayerStation1, humanPlayerStation2, humanPlayerStation1Prep, humanPlayerStation2Prep;
+    public GameObject field;
 
     private Rigidbody body;
     private GameObject heldBall;
     private float intakeForce = 1000.0f;
 
+    private Scorekeeper scorekeeper;
+
 	void Start () {
         body = GetComponent<Rigidbody>();
+        scorekeeper = field.GetComponent<Scorekeeper>();
 	}
 	
 	void Update () {
@@ -69,6 +74,16 @@ public class IntakeBall : MonoBehaviour {
         }
         if(other.tag == "Behind Blue Goal Box") {
             isBehindBlueGoal = true;
+        }
+
+        if(other.tag == "Truss Sensor") {
+            scorekeeper.score = scorekeeper.score + 10;
+        }
+        if(other.tag == "Blue High Goal Sensor") {
+            scorekeeper.score = scorekeeper.score + 10;
+        }
+        if(other.tag == "Blue Low Goal Sensor") {
+            scorekeeper.score = scorekeeper.score + 1;
         }
     }
 

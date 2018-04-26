@@ -1,6 +1,8 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Networking;
+using UnityEngine.UI;
 
 public class Control : MonoBehaviour {
 
@@ -8,6 +10,7 @@ public class Control : MonoBehaviour {
     public GameObject prefab, heldBall, clawBack, claw;
     public float shotPower, shotOffset, driveSpeed, turnSpeed;
     public GameObject humanPlayerStation1, humanPlayerStation2, humanPlayerStation1Prep, humanPlayerStation2Prep;
+    public GameObject field;
 
     private enum ClawState { VERTICAL, FORWARD_LONG_SHOT, FORWARD_SHORT_SHOT, BACKWARD_LONG_SHOT, BACKWARD_SHORT_SHOT, INTAKE }
     public float INTAKE, VERTICAL, FORWARD_LONG_SHOT, BACKWARD_LONG_SHOT;
@@ -34,6 +37,7 @@ public class Control : MonoBehaviour {
             intakeScript.humanPlayerStation2 = humanPlayerStation2;
             intakeScript.humanPlayerStation1Prep = humanPlayerStation1Prep;
             intakeScript.humanPlayerStation2Prep = humanPlayerStation2Prep;
+            intakeScript.field = field;
 
             ball.transform.position = heldBall.transform.position + (shotOffset * (heldBall.transform.position - clawBack.transform.position));
             ball.GetComponent<Rigidbody>().AddForce(shotPower * (heldBall.transform.position - clawBack.transform.position) + body.velocity, ForceMode.VelocityChange);
