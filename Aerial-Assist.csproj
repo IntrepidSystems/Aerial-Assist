@@ -287,9 +287,9 @@
     <Compile Include="Assets\Scripts\971\ClawControl.cs" />
     <Compile Include="Assets\Scripts\971\Control.cs" />
     <Compile Include="Assets\Scripts\AudioScript.cs" />
+    <Compile Include="Assets\Scripts\BallController.cs" />
     <Compile Include="Assets\Scripts\CameraFollower.cs" />
     <Compile Include="Assets\Scripts\FollowObject.cs" />
-    <Compile Include="Assets\Scripts\IntakeBall.cs" />
     <Compile Include="Assets\Scripts\Scorekeeper.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

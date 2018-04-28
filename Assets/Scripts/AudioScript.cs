@@ -9,20 +9,9 @@ public class AudioScript : MonoBehaviour {
 
 	void Start () {
         musicSource.clip = musicClip;
+        musicSource.pitch = 1.0f;
         musicSource.Play();
-        InvokeRepeating("ChangePitch", 8.5f, 0.25f);
 	}
-
-    private bool isFlipped = false;
-    void ChangePitch() {
-        if(isFlipped) {
-            musicSource.pitch = 1.0f;
-            isFlipped = false;
-        } else {
-            musicSource.pitch = 1.1f;
-            isFlipped = true;
-        }
-    }
 	
 	void Update () {
         
