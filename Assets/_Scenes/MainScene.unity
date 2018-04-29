@@ -31801,7 +31801,9 @@ MonoBehaviour:
   teleopBegin: {fileID: 8300000, guid: a939a0ae1016da24a8e7290749a8c12d, type: 3}
   warning: {fileID: 8300000, guid: 473c27e697ba6e342b994c36b54419ff, type: 3}
   matchEnd: {fileID: 8300000, guid: f6a0ea0adb320e548afa5990b2e1974a, type: 3}
-  music: {fileID: 8300000, guid: 2a2cfe0a8ac9550419ef3f9d931f45d8, type: 3}
+  musicClips:
+  - {fileID: 8300000, guid: 53d92aa82c7380e4fbcb7ec2039cfd61, type: 3}
+  - {fileID: 8300000, guid: 2a2cfe0a8ac9550419ef3f9d931f45d8, type: 3}
   score: 0
   scoreText: {fileID: 429834364}
 --- !u!114 &1817764796

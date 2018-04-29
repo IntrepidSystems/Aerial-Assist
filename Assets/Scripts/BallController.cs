@@ -205,7 +205,6 @@ public class BallController : MonoBehaviour {
                 return;
             }
         }
-        print("lol");
         if(FieldProperties.BLUE_BALLS.Count > 0) {
             return;
         }
