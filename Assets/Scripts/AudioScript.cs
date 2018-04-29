@@ -9,7 +9,6 @@ public class AudioScript : MonoBehaviour {
 
 	void Start () {
         musicSource.clip = musicClip;
-        musicSource.pitch = 1.0f;
         musicSource.Play();
 	}
 	

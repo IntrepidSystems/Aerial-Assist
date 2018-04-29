@@ -7,9 +7,10 @@ using UnityEngine.UI;
 public class Control : MonoBehaviour {
 
     private Rigidbody body;
-    public GameObject prefab, heldBall, clawBack, claw;
+
+    public bool isBlue;
+    public GameObject ballPrefab, heldBall, clawBack, claw;
     public float shotPower, shotOffset, driveSpeed, turnSpeed;
-    public GameObject humanPlayerStation1, humanPlayerStation2, humanPlayerStation1Prep, humanPlayerStation2Prep;
     public GameObject field;
     public GameObject intakeTarget;
 
@@ -28,26 +29,60 @@ public class Control : MonoBehaviour {
     private bool wasSpacedLast = false;
 
 	void Update () {
-        body.AddForce(body.transform.forward * Time.deltaTime * driveSpeed * Input.GetAxis("Vertical"), ForceMode.VelocityChange);
-        body.AddTorque(new Vector3(0.0f, Time.deltaTime * turnSpeed * Input.GetAxis("Horizontal"), 0.0f));
+        if (Scorekeeper.MATCH_STATE == Scorekeeper.MatchState.TELEOP) {
+            body.AddForce(new Vector3(body.transform.forward.x, 0.0f, body.transform.forward.z) * Time.deltaTime * driveSpeed * Input.GetAxis("Vertical"), ForceMode.VelocityChange);
+            body.AddTorque(new Vector3(0.0f, Time.deltaTime * turnSpeed * Input.GetAxis("Horizontal"), 0.0f));
 
-        if(!wasSpacedLast && Input.GetKey("space") && heldBall.active) {
-            GameObject ball = Instantiate(prefab);
-            BallController intakeScript = ball.GetComponent<BallController>();
-            intakeScript.humanPlayerStation1 = humanPlayerStation1;
-            intakeScript.humanPlayerStation2 = humanPlayerStation2;
-            intakeScript.humanPlayerStation1Prep = humanPlayerStation1Prep;
-            intakeScript.humanPlayerStation2Prep = humanPlayerStation2Prep;
-            intakeScript.field = field;
-            intakeScript.intakeTarget = intakeTarget;
+            if (!wasSpacedLast && Input.GetKey("space") && heldBall.active) {
+                FireBall();
+            }
+            wasSpacedLast = Input.GetKey("space");
 
-            ball.transform.position = heldBall.transform.position + (shotOffset * (heldBall.transform.position - clawBack.transform.position));
-            ball.GetComponent<Rigidbody>().AddForce(shotPower * (heldBall.transform.position - clawBack.transform.position) + body.velocity, ForceMode.VelocityChange);
-            heldBall.active = false;
+            if(heldBall.active) {
+                FieldProperties.BLUE_LEFT_MIDDLE_LIGHTS.active = false;
+                FieldProperties.BLUE_LEFT_OUTER_LIGHTS.active = false;
+                FieldProperties.BLUE_RIGHT_MIDDLE_LIGHTS.active = false;
+                FieldProperties.BLUE_RIGHT_OUTER_LIGHTS.active = false;
+
+                FieldProperties.BLUE_LEFT_INNER_LIGHTS.active = true;
+                FieldProperties.BLUE_RIGHT_INNER_LIGHTS.active = true;
+            }
+
+            ControlClaw();
         }
-        wasSpacedLast = Input.GetKey("space");
+        else if (Scorekeeper.MATCH_STATE == Scorekeeper.MatchState.AUTONOMOUS) {
+            if (Scorekeeper.TIME <= 1.0f) {
+                clawControl.MoveArmToEulerAngle(BACKWARD_LONG_SHOT);
+                DriveToAndPointAtPosition(new Vector3(-74.0f, 0.0f, 245.0f), true);
+            } else if(Scorekeeper.TIME <= 1.6f) {
+                DriveToPosition(new Vector3(-74.0f, 0.0f, 245.0f), true);
+            } else if(Scorekeeper.TIME <= 2.5f) {
+                PointAtLocation(new Vector3(-74.0f, 0.0f, 325.0f), true);
+            } else if(Scorekeeper.TIME <= 2.75f) {
+                FireBall();
+            } else if(Scorekeeper.TIME <= 5.0f) {
+                clawControl.MoveArmToEulerAngle(INTAKE);
 
-        ControlClaw();
+                if (Vector3.Distance(transform.position, new Vector3(0.0f, 0.0f, 45.0f)) > 80.0f) {
+                    DriveToAndPointAtPosition(new Vector3(0.0f, 0.0f, 45.0f), false);
+                } else {
+                    DriveToPosition(new Vector3(0.0f, 0.0f, 45.0f), false);
+                }
+            } else if(Scorekeeper.TIME <= 8.0f) {
+                clawControl.MoveArmToEulerAngle(BACKWARD_LONG_SHOT);
+
+                if (Vector3.Distance(transform.position, new Vector3(74.0f, 0.0f, 245.0f)) > 80.0f) {
+                    DriveToAndPointAtPosition(new Vector3(74.0f, 0.0f, 245.0f), true);
+                }
+                else {
+                    DriveToPosition(new Vector3(74.0f, 0.0f, 245.0f), true);
+                }
+            } else if(Scorekeeper.TIME <= 9.0f) {
+                PointAtLocation(new Vector3(74.0f, 0.0f, 325.0f), true);
+            } else {
+                FireBall();
+            }
+        }
 	}
 
     private void ControlClaw() {
@@ -78,6 +113,52 @@ public class Control : MonoBehaviour {
                 clawControl.MoveArmToEulerAngle(BACKWARD_LONG_SHOT);
                 break;
         }
+    }
+
+    public void FireBall() {
+        if (heldBall.active) {
+            GameObject ball = Instantiate(ballPrefab);
+            BallController intakeScript = ball.GetComponent<BallController>();
+            intakeScript.field = field;
+            intakeScript.ballPrefab = ballPrefab;
+            intakeScript.isBlue = isBlue;
+
+            ball.transform.position = heldBall.transform.position + (shotOffset * (heldBall.transform.position - clawBack.transform.position));
+            ball.GetComponent<Rigidbody>().AddForce(shotPower * 1.5f * (heldBall.transform.position - clawBack.transform.position) + body.velocity, ForceMode.VelocityChange);
+            heldBall.active = false;
+        }
+    }
+
+    public void DriveToAndPointAtPosition(Vector3 target, bool reverse) {
+        DriveToPosition(target, reverse);
+        PointAtLocation(target, reverse);
+    }
+
+    public void DriveToPosition(Vector3 target, bool reverse) {
+        float output = ((reverse) ? -1.0f : 1.0f) * Vector3.Distance(transform.position,target);
+        output = (Mathf.Abs(output) > 1.0) ? Mathf.Sign(output) * 1.0f : output;
+
+        if (Vector3.Distance(transform.position, target) > 10.0f) {
+            body.AddForce(new Vector3(body.transform.forward.x, 0.0f, body.transform.forward.z) * Time.deltaTime * driveSpeed * output, ForceMode.VelocityChange);
+        } else {
+            body.AddForce(Vector3.zero);
+        }
+    }
+
+    public void PointAtLocation(Vector3 target, bool reverse) {
+        float adjAngleError = Vector3.SignedAngle(transform.forward, target - transform.position, new Vector3(0.0f, 1.0f, 0.0f));
+        if(reverse) {
+            adjAngleError += 180.0f;
+        }
+        while(adjAngleError > 180.0f) {
+            adjAngleError -= 360.0f;
+        }
+        while(adjAngleError < -180.0f) {
+            adjAngleError += 360.0f;
+        }
+
+        float output = (Mathf.Abs(adjAngleError) > 1.0f) ? Mathf.Sign(adjAngleError) * 1.0f : adjAngleError;
+        body.AddTorque(new Vector3(0.0f, Time.deltaTime * turnSpeed * output * 0.75f, 0.0f));
     }
 
 }

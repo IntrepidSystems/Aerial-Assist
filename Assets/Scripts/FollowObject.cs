@@ -5,7 +5,7 @@ using UnityEngine;
 public class FollowObject : MonoBehaviour {
 
     public GameObject follower, associatedBall;
-    public float intakeForce;
+    public bool isBlue;
 	
 	void Start () {
 		
