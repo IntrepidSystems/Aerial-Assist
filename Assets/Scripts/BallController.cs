@@ -5,8 +5,6 @@ using UnityEngine.UI;
 
 public class BallController : MonoBehaviour {
 
-    public GameObject field;
-    public GameObject ballPrefab;
     public bool isBlue;
 
     private Rigidbody body;
@@ -17,7 +15,7 @@ public class BallController : MonoBehaviour {
 
 	void Start() {
         body = GetComponent<Rigidbody>();
-        scorekeeper = field.GetComponent<Scorekeeper>();
+        scorekeeper = FieldProperties.FIELD.GetComponent<Scorekeeper>();
 	}
 	
 	void Update() {
@@ -43,7 +41,7 @@ public class BallController : MonoBehaviour {
     void RunBallActions() {
         switch(currentBallState) {
             case BallState.INTAKING:
-                if (!intakingRobotHeldBall.active) {
+                if (!intakingRobotHeldBall.active && isIntakingRobotBlue == isBlue) {
                     body.AddForce(800.0f * (intakingRobotHeldBall.transform.position - transform.position));
                     body.detectCollisions = false;
                 } else {
@@ -158,9 +156,13 @@ public class BallController : MonoBehaviour {
         if(other.tag == "Intake Back") {
             GameObject intakeBack = other.gameObject;
             ClawBack intakeBackScript = intakeBack.GetComponent<ClawBack>();
-            if(!intakeBackScript.associatedBall.active) {
-                intakeBackScript.associatedBall.active = true;
-                DestroyBall();
+            if (intakeBackScript.isBlue == isBlue) {
+                if (!intakeBackScript.associatedBall.active) {
+                    intakeBackScript.associatedBall.active = true;
+                    DestroyBall();
+                }
+            } else {
+                DestroyBallAndSpawnNew();
             }
         }
 
@@ -168,11 +170,22 @@ public class BallController : MonoBehaviour {
             UpdateBallReturnInfo(false, Vector3.zero);
         }
 
-        if(other.tag == "Blue High Goal Sensor" || other.tag == "Blue Low Goal Sensor") {
-            scorekeeper.score += (((other.tag == "Blue High Goal Sensor") ? 10 : 1) + ((Scorekeeper.MATCH_STATE == Scorekeeper.MatchState.AUTONOMOUS) ? 10 : 0));
-            UpdateRespawnBallInfo(true, false);
-        } else if(other.tag == "Truss Sensor") {
-            scorekeeper.score += 10;
+        if (isBlue) {
+            if (other.tag == "Blue High Goal Sensor" || other.tag == "Blue Low Goal Sensor") {
+                scorekeeper.blueScore += (((other.tag == "Blue High Goal Sensor") ? 10 : 1) + ((Scorekeeper.MATCH_STATE == Scorekeeper.MatchState.AUTONOMOUS) ? 10 : 0));
+                UpdateRespawnBallInfo(true, false);
+            }
+            else if (other.tag == "Truss Sensor") {
+                scorekeeper.blueScore += 10;
+            }
+        } else {
+            if (other.tag == "Red High Goal Sensor" || other.tag == "Red Low Goal Sensor") {
+                scorekeeper.redScore += (((other.tag == "Red High Goal Sensor") ? 10 : 1) + ((Scorekeeper.MATCH_STATE == Scorekeeper.MatchState.AUTONOMOUS) ? 10 : 0));
+                UpdateRespawnBallInfo(true, false);
+            }
+            else if (other.tag == "Truss Sensor") {
+                scorekeeper.redScore += 10;
+            }
         }
     }
 
@@ -182,15 +195,26 @@ public class BallController : MonoBehaviour {
         }
 
         if(other.tag == "Field Box" && currentBallState != BallState.INTAKING) {
-            UpdateBallReturnInfo(true, GetClosestLocationToPosition(transform.position, 
-                new Vector3[] { FieldProperties.BLUE_HUMAN_PLAYER_LEFT_SCORING.transform.position, FieldProperties.BLUE_HUMAN_PLAYER_RIGHT_SCORING.transform.position,
+            if (isBlue) {
+                UpdateBallReturnInfo(true, GetClosestLocationToPosition(transform.position,
+                    new Vector3[] { FieldProperties.BLUE_HUMAN_PLAYER_LEFT_SCORING.transform.position, FieldProperties.BLUE_HUMAN_PLAYER_RIGHT_SCORING.transform.position,
                 FieldProperties.BLUE_HUMAN_PLAYER_LEFT_INBOUND.transform.position, FieldProperties.BLUE_HUMAN_PLAYER_RIGHT_INBOUND.transform.position }
-                ));
+                    ));
+            } else {
+                UpdateBallReturnInfo(true, GetClosestLocationToPosition(transform.position,
+                    new Vector3[] { FieldProperties.RED_HUMAN_PLAYER_LEFT_SCORING.transform.position, FieldProperties.RED_HUMAN_PLAYER_RIGHT_SCORING.transform.position,
+                FieldProperties.RED_HUMAN_PLAYER_LEFT_INBOUND.transform.position, FieldProperties.RED_HUMAN_PLAYER_RIGHT_INBOUND.transform.position }
+                    ));
+            }
         }
     }
 
     public void DestroyBall() {
-        FieldProperties.BLUE_BALLS.Remove(gameObject);
+        if (isBlue) {
+            FieldProperties.BLUE_BALLS.Remove(gameObject);
+        } else {
+            FieldProperties.RED_BALLS.Remove(gameObject);
+        }
         Destroy(gameObject);
     }
 
@@ -200,32 +224,57 @@ public class BallController : MonoBehaviour {
     }
 
     public void SpawnNewPedestalBall() {
-        foreach(GameObject robot in FieldProperties.ROBOTS) {
-            if(robot.GetComponent<Control>().heldBall.active) {
+        if (isBlue) {
+            foreach (GameObject robot in FieldProperties.ROBOTS) {
+                if (robot.GetComponent<Control>().heldBall.active) {
+                    return;
+                }
+            }
+            if (FieldProperties.BLUE_BALLS.Count > 0) {
                 return;
             }
-        }
-        if(FieldProperties.BLUE_BALLS.Count > 0) {
-            return;
-        }
 
-        FieldProperties.BLUE_LEFT_INNER_LIGHTS.active = false;
-        FieldProperties.BLUE_RIGHT_INNER_LIGHTS.active = false;
+            FieldProperties.BLUE_LEFT_INNER_LIGHTS.active = false;
+            FieldProperties.BLUE_RIGHT_INNER_LIGHTS.active = false;
 
-        GameObject newBall = Instantiate(ballPrefab);
-        newBall.transform.position = FieldProperties.BLUE_PEDESTAL.transform.position;
+            GameObject newBall = Instantiate(FieldProperties.BLUE_BALL_PREFAB);
+            newBall.transform.position = FieldProperties.BLUE_PEDESTAL.transform.position;
 
-        BallController newBallController = newBall.GetComponent<BallController>();
-        newBallController.isBlue = isBlue;
-        newBallController.field = field;
-        newBallController.ballPrefab = ballPrefab;
-        newBallController.currentBallState = BallState.RETURNING;
-        newBallController.UpdateBallReturnInfo(true, GetClosestLocationToPosition(newBall.transform.position,
-                new Vector3[] { FieldProperties.BLUE_HUMAN_PLAYER_LEFT_SCORING.transform.position, FieldProperties.BLUE_HUMAN_PLAYER_RIGHT_SCORING.transform.position,
+            BallController newBallController = newBall.GetComponent<BallController>();
+            newBallController.isBlue = isBlue;
+            newBallController.currentBallState = BallState.RETURNING;
+            newBallController.UpdateBallReturnInfo(true, GetClosestLocationToPosition(newBall.transform.position,
+                    new Vector3[] { FieldProperties.BLUE_HUMAN_PLAYER_LEFT_SCORING.transform.position, FieldProperties.BLUE_HUMAN_PLAYER_RIGHT_SCORING.transform.position,
                 FieldProperties.BLUE_HUMAN_PLAYER_LEFT_INBOUND.transform.position, FieldProperties.BLUE_HUMAN_PLAYER_RIGHT_INBOUND.transform.position }
-                ));
+                    ));
 
-        FieldProperties.BLUE_BALLS.Add(newBall);
+            FieldProperties.BLUE_BALLS.Add(newBall);
+        } else {
+            foreach (GameObject robot in FieldProperties.ROBOTS) {
+                if (robot.GetComponent<Control>().heldBall.active) {
+                    return;
+                }
+            }
+            if (FieldProperties.RED_BALLS.Count > 0) {
+                return;
+            }
+
+            FieldProperties.RED_LEFT_INNER_LIGHTS.active = false;
+            FieldProperties.RED_RIGHT_INNER_LIGHTS.active = false;
+
+            GameObject newBall = Instantiate(FieldProperties.RED_BALL_PREFAB);
+            newBall.transform.position = FieldProperties.RED_PEDESTAL.transform.position;
+
+            BallController newBallController = newBall.GetComponent<BallController>();
+            newBallController.isBlue = isBlue;
+            newBallController.currentBallState = BallState.RETURNING;
+            newBallController.UpdateBallReturnInfo(true, GetClosestLocationToPosition(newBall.transform.position,
+                    new Vector3[] { FieldProperties.RED_HUMAN_PLAYER_LEFT_SCORING.transform.position, FieldProperties.RED_HUMAN_PLAYER_RIGHT_SCORING.transform.position,
+                FieldProperties.RED_HUMAN_PLAYER_LEFT_INBOUND.transform.position, FieldProperties.RED_HUMAN_PLAYER_RIGHT_INBOUND.transform.position }
+                    ));
+
+            FieldProperties.RED_BALLS.Add(newBall);
+        }
     }
 
 }

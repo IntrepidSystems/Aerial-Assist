@@ -14,8 +14,8 @@ public class Scorekeeper : MonoBehaviour {
     public AudioClip matchStart, autoEnd, teleopBegin, warning, matchEnd;
     public List<AudioClip> musicClips;
 
-    public int score = 0;
-    public Text scoreText;
+    public int blueScore = 0, redScore = 0;
+    public Text blueScoreText, redScoreText, timeText;
 
     private bool hasPlayedMatchStart, hasPlayedAutoEnd, hasPlayedTeleopBegin, hasPlayedWarning, hasPlayedMatchEnd;
     private bool hasStartedMusic;
@@ -25,7 +25,7 @@ public class Scorekeeper : MonoBehaviour {
 
 	void Start () {
         Scorekeeper.TIME = 0.0f;
-        score = 0;
+        blueScore = 0;
         hasPlayedMatchStart = false;
         hasPlayedAutoEnd = false;
         hasPlayedTeleopBegin = false;
@@ -38,9 +38,10 @@ public class Scorekeeper : MonoBehaviour {
 	}
 
     void Update() {
-        if (Scorekeeper.MATCH_STATE != MatchState.DISABLED) {
+        if(Scorekeeper.MATCH_STATE != MatchState.DISABLED) {
             Scorekeeper.TIME += Time.deltaTime;
-            scoreText.text = "Score: " + score;
+            blueScoreText.text = blueScore.ToString();
+            redScoreText.text = redScore.ToString();
 
             if (Scorekeeper.TIME >= 1.0f && !hasStartedMusic) {
                 int musicIndex = (int) Mathf.Round(Random.value * ((float) musicClips.Count)) - 1;
@@ -51,22 +52,69 @@ public class Scorekeeper : MonoBehaviour {
             else if (Scorekeeper.TIME >= 10.0f && !hasPlayedAutoEnd) {
                 PlaySound(autoEnd);
                 hasPlayedAutoEnd = true;
+
+                timeText.text = "0:00";
             }
             else if (Scorekeeper.TIME >= 11.5f && !hasPlayedTeleopBegin) {
                 PlaySound(teleopBegin);
                 Scorekeeper.MATCH_STATE = MatchState.TELEOP;
                 hasPlayedTeleopBegin = true;
             }
-            else if (Scorekeeper.TIME >= 117.0f && !hasPlayedWarning) {
+            else if (Scorekeeper.TIME >= 117.5f && !hasPlayedWarning) {
                 PlaySound(warning);
                 hasPlayedWarning = true;
             }
-            else if (Scorekeeper.TIME >= 147.0f && !hasPlayedMatchEnd) {
+            else if (Scorekeeper.TIME >= 146.5f && !hasPlayedMatchEnd) {
                 PlaySound(matchEnd);
-                //musicPlayer.Stop();
+                musicPlayer.Stop();
                 Scorekeeper.MATCH_STATE = MatchState.DISABLED;
                 hasPlayedMatchEnd = true;
             }
+        }
+
+        if (Scorekeeper.MATCH_STATE == MatchState.AUTONOMOUS) {
+            int time = (int)Mathf.Ceil(10.0f - Scorekeeper.TIME);
+            if (time >= 0) {
+                if (time < 10) {
+                    timeText.text = "0:0" + time;
+                }
+                else {
+                    timeText.text = "0:" + time;
+                }
+            }
+            else {
+                timeText.text = "0:00";
+            }
+        } else if (Scorekeeper.MATCH_STATE == MatchState.TELEOP) {
+            int time = 135 - (int)Mathf.Floor(Scorekeeper.TIME - 11.5f);
+            if (time >= 120) {
+                if (time > 129) {
+                    timeText.text = "2:" + (time - 120);
+                }
+                else {
+                    timeText.text = "2:0" + (time - 120);
+                }
+            }
+            else if (time >= 60) {
+                if (time > 69) {
+                    timeText.text = "1:" + (time - 60);
+                }
+                else {
+                    timeText.text = "1:0" + (time - 60);
+                }
+            }
+            else if (time >= 0) {
+                if (time > 9) {
+                    timeText.text = "0:" + time;
+                }
+                else {
+                    timeText.text = "0:0" + time;
+                }
+            } else {
+                timeText.text = "0:00";
+            }
+        } else if (Scorekeeper.MATCH_STATE == MatchState.DISABLED) {
+            timeText.text = "0:00";
         }
 	}
 

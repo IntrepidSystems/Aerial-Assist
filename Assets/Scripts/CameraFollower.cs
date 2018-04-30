@@ -11,7 +11,7 @@ public class CameraFollower : MonoBehaviour {
 	}
 	
 	void Update () {
-        transform.LookAt(follow.transform);
+        transform.LookAt(new Vector3(0.0f, 0.0f, 0.0f));
 	}
 
 }

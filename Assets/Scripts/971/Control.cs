@@ -9,7 +9,7 @@ public class Control : MonoBehaviour {
     private Rigidbody body;
 
     public bool isBlue;
-    public GameObject ballPrefab, heldBall, clawBack, claw;
+    public GameObject heldBall, clawBack, claw;
     public float shotPower, shotOffset, driveSpeed, turnSpeed;
     public GameObject field;
     public GameObject intakeTarget;
@@ -18,6 +18,8 @@ public class Control : MonoBehaviour {
     public float INTAKE, VERTICAL, FORWARD_LONG_SHOT, BACKWARD_LONG_SHOT;
     private ClawControl clawControl;
     private ClawState clawState;
+
+    public string forward, reverse, left, right, vertical, intake, forwardShot, reverseShot, fire;
 
     void Start () {
         body = GetComponent<Rigidbody>();
@@ -30,69 +32,132 @@ public class Control : MonoBehaviour {
 
 	void Update () {
         if (Scorekeeper.MATCH_STATE == Scorekeeper.MatchState.TELEOP) {
-            body.AddForce(new Vector3(body.transform.forward.x, 0.0f, body.transform.forward.z) * Time.deltaTime * driveSpeed * Input.GetAxis("Vertical"), ForceMode.VelocityChange);
-            body.AddTorque(new Vector3(0.0f, Time.deltaTime * turnSpeed * Input.GetAxis("Horizontal"), 0.0f));
+            float forwardInput = ((Input.GetKey(forward)) ? 1.0f : 0.0f) + (Input.GetKey(reverse) ? -1.0f : 0.0f);
+            float turnInput = ((Input.GetKey(right)) ? 1.0f : 0.0f) + (Input.GetKey(left) ? -1.0f : 0.0f);
 
-            if (!wasSpacedLast && Input.GetKey("space") && heldBall.active) {
+            body.AddForce(new Vector3(body.transform.forward.x, 0.0f, body.transform.forward.z) * Time.deltaTime * driveSpeed * forwardInput, ForceMode.VelocityChange);
+            body.AddTorque(new Vector3(0.0f, Time.deltaTime * turnSpeed * turnInput, 0.0f));
+
+            if (!wasSpacedLast && Input.GetKey(fire) && heldBall.active) {
                 FireBall();
             }
-            wasSpacedLast = Input.GetKey("space");
+            wasSpacedLast = Input.GetKey(fire);
 
             if(heldBall.active) {
-                FieldProperties.BLUE_LEFT_MIDDLE_LIGHTS.active = false;
-                FieldProperties.BLUE_LEFT_OUTER_LIGHTS.active = false;
-                FieldProperties.BLUE_RIGHT_MIDDLE_LIGHTS.active = false;
-                FieldProperties.BLUE_RIGHT_OUTER_LIGHTS.active = false;
+                if (isBlue) {
+                    FieldProperties.BLUE_LEFT_MIDDLE_LIGHTS.active = false;
+                    FieldProperties.BLUE_LEFT_OUTER_LIGHTS.active = false;
+                    FieldProperties.BLUE_RIGHT_MIDDLE_LIGHTS.active = false;
+                    FieldProperties.BLUE_RIGHT_OUTER_LIGHTS.active = false;
 
-                FieldProperties.BLUE_LEFT_INNER_LIGHTS.active = true;
-                FieldProperties.BLUE_RIGHT_INNER_LIGHTS.active = true;
+                    FieldProperties.BLUE_LEFT_INNER_LIGHTS.active = true;
+                    FieldProperties.BLUE_RIGHT_INNER_LIGHTS.active = true;
+                } else {
+                    FieldProperties.RED_LEFT_MIDDLE_LIGHTS.active = false;
+                    FieldProperties.RED_LEFT_OUTER_LIGHTS.active = false;
+                    FieldProperties.RED_RIGHT_MIDDLE_LIGHTS.active = false;
+                    FieldProperties.RED_RIGHT_OUTER_LIGHTS.active = false;
+
+                    FieldProperties.RED_LEFT_INNER_LIGHTS.active = true;
+                    FieldProperties.RED_RIGHT_INNER_LIGHTS.active = true;
+                }
             }
 
             ControlClaw();
         }
         else if (Scorekeeper.MATCH_STATE == Scorekeeper.MatchState.AUTONOMOUS) {
-            if (Scorekeeper.TIME <= 1.0f) {
-                clawControl.MoveArmToEulerAngle(BACKWARD_LONG_SHOT);
-                DriveToAndPointAtPosition(new Vector3(-74.0f, 0.0f, 245.0f), true);
-            } else if(Scorekeeper.TIME <= 1.6f) {
-                DriveToPosition(new Vector3(-74.0f, 0.0f, 245.0f), true);
-            } else if(Scorekeeper.TIME <= 2.5f) {
-                PointAtLocation(new Vector3(-74.0f, 0.0f, 325.0f), true);
-            } else if(Scorekeeper.TIME <= 2.75f) {
-                FireBall();
-            } else if(Scorekeeper.TIME <= 5.0f) {
-                clawControl.MoveArmToEulerAngle(INTAKE);
-
-                if (Vector3.Distance(transform.position, new Vector3(0.0f, 0.0f, 45.0f)) > 80.0f) {
-                    DriveToAndPointAtPosition(new Vector3(0.0f, 0.0f, 45.0f), false);
-                } else {
-                    DriveToPosition(new Vector3(0.0f, 0.0f, 45.0f), false);
+            if (isBlue) {
+                if (Scorekeeper.TIME <= 1.0f) {
+                    clawControl.MoveArmToEulerAngle(BACKWARD_LONG_SHOT);
+                    DriveToAndPointAtPosition(new Vector3(-74.0f, 0.0f, 245.0f), true);
                 }
-            } else if(Scorekeeper.TIME <= 8.0f) {
-                clawControl.MoveArmToEulerAngle(BACKWARD_LONG_SHOT);
+                else if (Scorekeeper.TIME <= 1.6f) {
+                    DriveToPosition(new Vector3(-74.0f, 0.0f, 245.0f), true);
+                }
+                else if (Scorekeeper.TIME <= 2.5f) {
+                    PointAtLocation(new Vector3(-74.0f, 0.0f, 325.0f), true);
+                }
+                else if (Scorekeeper.TIME <= 2.75f) {
+                    FireBall();
+                }
+                else if (Scorekeeper.TIME <= 5.0f) {
+                    clawControl.MoveArmToEulerAngle(INTAKE);
 
-                if (Vector3.Distance(transform.position, new Vector3(74.0f, 0.0f, 245.0f)) > 80.0f) {
-                    DriveToAndPointAtPosition(new Vector3(74.0f, 0.0f, 245.0f), true);
+                    if (Vector3.Distance(transform.position, new Vector3(0.0f, 0.0f, 45.0f)) > 80.0f) {
+                        DriveToAndPointAtPosition(new Vector3(0.0f, 0.0f, 45.0f), false);
+                    }
+                    else {
+                        DriveToPosition(new Vector3(0.0f, 0.0f, 45.0f), false);
+                    }
+                }
+                else if (Scorekeeper.TIME <= 8.0f) {
+                    clawControl.MoveArmToEulerAngle(BACKWARD_LONG_SHOT);
+
+                    if (Vector3.Distance(transform.position, new Vector3(74.0f, 0.0f, 245.0f)) > 80.0f) {
+                        DriveToAndPointAtPosition(new Vector3(74.0f, 0.0f, 245.0f), true);
+                    }
+                    else {
+                        DriveToPosition(new Vector3(74.0f, 0.0f, 245.0f), true);
+                    }
+                }
+                else if (Scorekeeper.TIME <= 9.0f) {
+                    PointAtLocation(new Vector3(74.0f, 0.0f, 325.0f), true);
                 }
                 else {
-                    DriveToPosition(new Vector3(74.0f, 0.0f, 245.0f), true);
+                    FireBall();
                 }
-            } else if(Scorekeeper.TIME <= 9.0f) {
-                PointAtLocation(new Vector3(74.0f, 0.0f, 325.0f), true);
             } else {
-                FireBall();
+                if (Scorekeeper.TIME <= 1.0f) {
+                    clawControl.MoveArmToEulerAngle(BACKWARD_LONG_SHOT);
+                    DriveToAndPointAtPosition(new Vector3(74.0f, 0.0f, -245.0f), true);
+                }
+                else if (Scorekeeper.TIME <= 1.6f) {
+                    DriveToPosition(new Vector3(74.0f, 0.0f, -245.0f), true);
+                }
+                else if (Scorekeeper.TIME <= 2.5f) {
+                    PointAtLocation(new Vector3(74.0f, 0.0f, -325.0f), true);
+                }
+                else if (Scorekeeper.TIME <= 2.75f) {
+                    FireBall();
+                }
+                else if (Scorekeeper.TIME <= 5.0f) {
+                    clawControl.MoveArmToEulerAngle(INTAKE);
+
+                    if (Vector3.Distance(transform.position, new Vector3(0.0f, 0.0f, -45.0f)) > 80.0f) {
+                        DriveToAndPointAtPosition(new Vector3(0.0f, 0.0f, -45.0f), false);
+                    }
+                    else {
+                        DriveToPosition(new Vector3(0.0f, 0.0f, -45.0f), false);
+                    }
+                }
+                else if (Scorekeeper.TIME <= 8.0f) {
+                    clawControl.MoveArmToEulerAngle(BACKWARD_LONG_SHOT);
+
+                    if (Vector3.Distance(transform.position, new Vector3(-74.0f, 0.0f, -245.0f)) > 80.0f) {
+                        DriveToAndPointAtPosition(new Vector3(-74.0f, 0.0f, -245.0f), true);
+                    }
+                    else {
+                        DriveToPosition(new Vector3(-74.0f, 0.0f, -245.0f), true);
+                    }
+                }
+                else if (Scorekeeper.TIME <= 9.0f) {
+                    PointAtLocation(new Vector3(-74.0f, 0.0f, -325.0f), true);
+                }
+                else {
+                    FireBall();
+                }
             }
         }
 	}
 
     private void ControlClaw() {
-        if(Input.GetKey("w")) {
+        if(Input.GetKey(vertical)) {
             clawState = ClawState.VERTICAL;
-        } else if(Input.GetKey("d")) {
+        } else if(Input.GetKey(forwardShot)) {
             clawState = ClawState.FORWARD_LONG_SHOT;
-        } else if(Input.GetKey("s")) {
+        } else if(Input.GetKey(intake)) {
             clawState = ClawState.INTAKE;
-        } else if(Input.GetKey("a")) {
+        } else if(Input.GetKey(reverseShot)) {
             clawState = ClawState.BACKWARD_LONG_SHOT;
         }
 
@@ -117,10 +182,13 @@ public class Control : MonoBehaviour {
 
     public void FireBall() {
         if (heldBall.active) {
-            GameObject ball = Instantiate(ballPrefab);
+            GameObject ball;
+            if(isBlue) {
+                ball = Instantiate(FieldProperties.BLUE_BALL_PREFAB);
+            } else {
+                ball = Instantiate(FieldProperties.RED_BALL_PREFAB);
+            }
             BallController intakeScript = ball.GetComponent<BallController>();
-            intakeScript.field = field;
-            intakeScript.ballPrefab = ballPrefab;
             intakeScript.isBlue = isBlue;
 
             ball.transform.position = heldBall.transform.position + (shotOffset * (heldBall.transform.position - clawBack.transform.position));

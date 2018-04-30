@@ -5,6 +5,7 @@ using UnityEngine;
 public class ClawBack : MonoBehaviour {
 
     public GameObject associatedBall;
+    public bool isBlue;
 
 	void Start () {
 		
