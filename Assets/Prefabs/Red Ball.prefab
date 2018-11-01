@@ -24,6 +24,7 @@ GameObject:
   - component: {fileID: 23487682184833150}
   - component: {fileID: 54960026175781236}
   - component: {fileID: 114583812848519246}
+  - component: {fileID: 114223798467699804}
   m_Layer: 0
   m_Name: Red Ball
   m_TagString: Untagged
@@ -100,6 +101,38 @@ Rigidbody:
   m_Interpolate: 0
   m_Constraints: 0
   m_CollisionDetection: 0
+--- !u!114 &114223798467699804
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1240345405490850}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 372142912, guid: dc443db3e92b4983b9738c1131f555cb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_SceneId:
+    m_Value: 0
+  m_AssetId:
+    i0: 146
+    i1: 153
+    i2: 130
+    i3: 89
+    i4: 6
+    i5: 214
+    i6: 226
+    i7: 68
+    i8: 185
+    i9: 183
+    i10: 244
+    i11: 227
+    i12: 227
+    i13: 206
+    i14: 104
+    i15: 209
+  m_ServerOnly: 0
+  m_LocalPlayerAuthority: 0
 --- !u!114 &114583812848519246
 MonoBehaviour:
   m_ObjectHideFlags: 1

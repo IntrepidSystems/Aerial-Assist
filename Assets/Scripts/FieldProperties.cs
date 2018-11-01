@@ -1,16 +1,19 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using System.Text.RegularExpressions;
 using UnityEngine;
+using UnityEngine.Networking;
+using UnityEngine.Networking.Match;
 
-public class FieldProperties : MonoBehaviour {
+public class FieldProperties : NetworkBehaviour {
 
     public static GameObject BLUE_HUMAN_PLAYER_LEFT_SCORING, BLUE_HUMAN_PLAYER_RIGHT_SCORING, BLUE_HUMAN_PLAYER_LEFT_INBOUND, BLUE_HUMAN_PLAYER_RIGHT_INBOUND, BLUE_PEDESTAL,
         RED_HUMAN_PLAYER_LEFT_SCORING, RED_HUMAN_PLAYER_RIGHT_SCORING, RED_HUMAN_PLAYER_LEFT_INBOUND, RED_HUMAN_PLAYER_RIGHT_INBOUND, RED_PEDESTAL;
     public GameObject blueHumanPlayerLeftScoring, blueHumanPlayerRightScoring, blueHumanPlayerLeftInbound, blueHumanPlayerRightInbound, bluePedestal,
         redHumanPlayerLeftScoring, redHumanPlayerRightScoring, redHumanPlayerLeftInbound, redHumanPlayerRightInbound, redPedestal;
 
-    public static GameObject[] ROBOTS;
-    public GameObject[] robots;
+    public static List<GameObject> ROBOTS;
+    public List<GameObject> robots;
 
     public static List<GameObject> BLUE_BALLS, RED_BALLS;
     public List<GameObject> blueBalls, redBalls;
@@ -32,6 +35,9 @@ public class FieldProperties : MonoBehaviour {
 
     public static GameObject BLUE_BALL_PREFAB, RED_BALL_PREFAB;
     public GameObject blueBallPrefab, redBallPrefab;
+
+    public static NetworkManager NETWORK_MANAGER;
+    public GameObject networkObject;
 
 
     void Start () {
@@ -73,6 +79,8 @@ public class FieldProperties : MonoBehaviour {
         FieldProperties.FIELD = field;
         FieldProperties.BLUE_BALL_PREFAB = blueBallPrefab;
         FieldProperties.RED_BALL_PREFAB = redBallPrefab;
+
+        FieldProperties.NETWORK_MANAGER = networkObject.GetComponent<NetworkManager>();
     }
 
 	void Update () {
@@ -111,6 +119,14 @@ public class FieldProperties : MonoBehaviour {
             FieldProperties.RED_RIGHT_MIDDLE_LIGHTS.active = false;
             FieldProperties.RED_RIGHT_OUTER_LIGHTS.active = false;
         }
+    }
+
+    public override void OnStartServer() {
+        GameObject blueBall = Instantiate(FieldProperties.BLUE_BALL_PREFAB, new Vector3(0.0f, 14.0f, 48.0f), Quaternion.identity);
+        GameObject redBall = Instantiate(FieldProperties.RED_BALL_PREFAB, new Vector3(0.0f, 14.0f, -48.0f), Quaternion.identity);
+
+        NetworkServer.Spawn(blueBall);
+        NetworkServer.Spawn(redBall);
     }
 
 }

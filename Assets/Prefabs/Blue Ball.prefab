@@ -24,6 +24,7 @@ GameObject:
   - component: {fileID: 23458846580808706}
   - component: {fileID: 54513019684090630}
   - component: {fileID: 114868446610248746}
+  - component: {fileID: 114001159819390690}
   m_Layer: 0
   m_Name: Blue Ball
   m_TagString: Untagged
@@ -100,6 +101,38 @@ Rigidbody:
   m_Interpolate: 0
   m_Constraints: 0
   m_CollisionDetection: 0
+--- !u!114 &114001159819390690
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1189717676382560}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 372142912, guid: dc443db3e92b4983b9738c1131f555cb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_SceneId:
+    m_Value: 0
+  m_AssetId:
+    i0: 161
+    i1: 56
+    i2: 86
+    i3: 211
+    i4: 90
+    i5: 52
+    i6: 179
+    i7: 180
+    i8: 138
+    i9: 193
+    i10: 226
+    i11: 56
+    i12: 75
+    i13: 176
+    i14: 150
+    i15: 36
+  m_ServerOnly: 0
+  m_LocalPlayerAuthority: 0
 --- !u!114 &114868446610248746
 MonoBehaviour:
   m_ObjectHideFlags: 1
